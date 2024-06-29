@@ -8,6 +8,16 @@ const todo = ref({
     tasks: []
 })
 
+const clearForm = () => {
+    todo.value = {
+        name: '',
+        tasks: []
+    }
+    inputTask.value = ''
+}
+
+defineExpose({ clearForm })
+
 const addTask = () => {
     if (inputTask.value.trim() === '') return
 
