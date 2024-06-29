@@ -2,45 +2,26 @@
 import TodoForm from './components/TodoForm.vue'
 import Card from './components/Card.vue'
 
-import { ref, onMounted, computed, watch, reactive } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 
 let setOfTodos = ref([])
-// const todos = ref([])
 const name = ref('')
-
-const inputContent = ref('')
-const inputCategory = ref(null)
+const form = ref(null)
 
 const save = (todo) => {
     setOfTodos.value.unshift(todo)
     localStorage.setItem('setOfTodos', JSON.stringify(setOfTodos.value))
+    form.value.clearForm()
 }
 
-// const todosAsc = computed(() => todos.value.sort((a,b) => {
-//     return b.createdAt - a.createdAt
-// }))
+const removeTodo = (todo) => {
+    const index = setOfTodos.value.findIndex(x => x.name === todo.name)
+    setOfTodos.value.splice(index, 1)
+}
 
-// const addTodo = () => {
-//     if (inputContent.value.trim() === '' || inputCategory.value === null) return
-
-//     todos.value.push({
-//         content: inputContent.value,
-//         category: inputCategory.value,
-//         done: false,
-//         createdAt: new Date().getTime()
-//     })
-
-//     inputContent.value = ''
-//     inputCategory.value = null
-// }
-
-// const removeTodo = todo => {
-//     todos.value = todos.value.filter(t => t !== todo)
-// }
-
-// watch(todos, (newVal) => {
-//     localStorage.setItem('todos', JSON.stringify(newVal))
-// }, { deep: true })
+watch(setOfTodos, (newVal) => {
+    localStorage.setItem('setOfTodos', JSON.stringify(newVal))
+}, { deep: true })
 
 watch(name, (newVal) => {
     localStorage.setItem('name', newVal)
@@ -48,7 +29,6 @@ watch(name, (newVal) => {
 
 onMounted(() => {
     name.value = localStorage.getItem('name') || ''
-    // todos.value = JSON.parse(localStorage.getItem('todos')) || []
     setOfTodos.value = JSON.parse(localStorage.getItem('setOfTodos')) || []
 })
 </script>
@@ -69,17 +49,26 @@ onMounted(() => {
             </section>
 
             <div class="flex mb-10">
-                <TodoForm @save="save"/>
+                <TodoForm @save="save" ref="form"/>
             </div>
 
             <section>
                 <h2 class="text-lg text-gray-800 mb-4 font-bold">Your list of todos:</h2>
-                <Card
-                    class="card-container"
-                    v-for="(item, key) in setOfTodos" :key="key"
-                    :todo="item"
-                >
-                </Card>
+
+                <div v-if="setOfTodos.length <=0" class="flex flex-col mb-5 items-center justify-center">
+                    <h2 class="text-md mb-2 text-gray-800 font-bold">No data found</h2>
+                    <img class="w-[120px] h-[120px]" src="./assets/no-data.png" alt="No data">
+                </div>
+
+                <div v-else class="flex flex-col flex-wrap">
+                    <Card
+                        class="card-container"
+                        v-for="(item, key) in setOfTodos" :key="key"
+                        :todo="item"
+                        @remove="removeTodo(item)"
+                    >
+                    </Card>
+                </div>
             </section>
         </div>
         
